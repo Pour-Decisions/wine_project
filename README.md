@@ -1,19 +1,19 @@
-# wine_project
-<<<<<<< HEAD
+# Pour_Decisions
 
 
 # Project Description:
 
+* Following the Data Science pipeline, build a machine learning model that accurately predicts wine quality rating.
 
-# Project Goal:
+# Goals:
 
-
-# Initial Thoughts:
-
-
-# The Plan
-
-
+* Acquire the data
+* Prepare the data 
+* Explore the data to find drivers of our target variable (quality rating)
+* Use clustering to discover patterns 
+* Use drivers to build models
+* Validate, and then test our best model
+* Deliver findings to a group of fellow data scientists
 
 
 # Data Dictionary
@@ -37,14 +37,25 @@
 # Steps to Reproduce
 
 
+* Clone my repo including the acquire.py, prepare.py, explore.py, and modeling.py (make sure to create a .gitignore to hide your csv files)
+
+* Run notebook
+
 
 # Takeaways and Conclusions
 
+* PolynomialFeatures was the best performing model, reducing RMSE from the baseline of 0.85, to 0.68 on the validate set. 
+
+* This resulted in a 20% reduction in root mean squared error on our validate set.
 
 # Recommendations
 
+* Aquire additional features such as type of grape, yeast type, fermentation temp, etc. 
 
 # Next Steps
+
+* With more time, we would like to explore additional feature engineering.
+
 =======
 This is a repo for: Quit Your Wine-ing: What makes a high quality wine?
 
@@ -67,4 +78,3 @@ This dataset contains the following columns:
 | alcohol              | str       | Percentage of alcohol by volume in the wine                                                       |
 | quality              | str       | Subjective measure of the quality of the wine                                                      |
 | wine                 | str       | Categorical variable indicating the type of wine, such as red or white                           |
->>>>>>> b2068c44596a253bdaaa238cb21f7c68aa616dca
