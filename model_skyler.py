@@ -20,19 +20,29 @@ from sklearn.linear_model import LinearRegression, LassoLars, TweedieRegressor
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.metrics import mean_squared_error
 from math import sqrt 
+import plotly as py
+import plotly.graph_objs as go
 
-def combined_df(df, f1, f2):
+def combined_df(df, f1, f2, f3, f4):
     '''
     This function calls another function in explore.py 
     and merges a column to the original dataset
     '''
     
-    X = clustering(df, f1, f2)
+    X1 = clustering(df, f1, f2)
+    X2 = clustering(df, f1, f3)
+    X3 = clustering(df, f2, f4)
     
-    scaled_clusters = X['scaled_clusters']
-    df = pd.merge(df, scaled_clusters, left_index=True, right_index=True)
+    scaled_clusters1 = X1['scaled_clusters']
+    scaled_clusters2 = X2['scaled_clusters']
+    scaled_clusters3 = X3['scaled_clusters']
+    
+    df = pd.merge(df, scaled_clusters1, left_index=True, right_index=True)
+    df = pd.merge(df, scaled_clusters2, left_index=True, right_index=True)
+    df = pd.merge(df, scaled_clusters3, left_index=True, right_index=True)
     
     return df
+
 
 
 def cluster_relplot(df, f1, f2):
@@ -62,14 +72,14 @@ def clustering(train, f1, f2):
     # define 'X'
     X = train[[f1, f2]]
     # fit the thing
-    kmeans = KMeans(n_clusters = 3, random_state= seed)
+    kmeans = KMeans(n_clusters = 4, random_state= seed)
     kmeans.fit(X)
     kmeans.predict(X)
     # scale features
     mm_scaler = MinMaxScaler()
     X[[f1, f2]] = mm_scaler.fit_transform(X[[f1, f2]])
     # predict
-    kmeans_scale = KMeans(n_clusters = 3, random_state = 828)
+    kmeans_scale = KMeans(n_clusters = 4, random_state = 828)
     kmeans_scale.fit(X[[f1, f2]])
     kmeans_scale.predict(X[[f1, f2]])
     # add predictions to a new column
@@ -103,53 +113,62 @@ def best_cluster(train, f1, f2):
     sns.set_style("whitegrid")
     sns.relplot(data = results_df, x='n_clusters', y = 'inertia', kind = 'line')
     plt.xticks(np.arange(0, 11, step=1))
-    point = (3, 62) # specify the x and y values of the point to annotate
-    plt.annotate("optimal cluster", xy=point, xytext=(3.2, 75), 
+    point = (4, 62) # specify the x and y values of the point to annotate
+    plt.annotate("optimal cluster", xy=point, xytext=(4.2, 75), 
                  arrowprops=dict(facecolor='black', shrink=0.05))
     # title
     plt.title('Clusters Versus Inertia')
     
     return plt.show()
     
-    return plt.show()
 
 
 def find_best_features(df, k_min, k_max):
     '''
-    This function takes in a dataframe,  a minimum number 
+    This function takes in a dataframe, a minimum number 
     of clusters (k_min), and a maximum number 
-    of clusters (k_max). It returns a list of the best features 
-    to use for clustering based on the Silhouette score.
+    of clusters (k_max). It returns a list of the top 6 features 
+    to use for clustering based on the mean Silhouette score.
     '''
     # Remove the target column from the dataframe
     X = df.drop(['quality', 'color'], axis=1)
-    
-    # Create an empty list to store the best features
-    best_features = []
-    
-    # Loop through the range of k values
-    for k in range(k_min, k_max+1):
-        # Fit a KMeans clustering model
-        kmeans = KMeans(n_clusters=k, random_state=828).fit(X)
-        
-        # Calculate the Silhouette score for the clustering
-        score = silhouette_score(X, kmeans.labels_)
-        
-        # If this is the first iteration, add all features to the best_features list
-        if k == k_min:
-            best_features = list(X.columns)
-        else:
-            # For each subsequent iteration, compare the Silhouette score to the previous iteration
-            # If the score has improved, update the best_features list with the current set of features
-            if score > prev_score:
-                best_features = list(X.columns)
-        
-        # Set the previous score to the current score for the next iteration
-        prev_score = score
-    
-    # Return the list of best features
-    return best_features
 
+    # Create an empty dictionary to store the mean Silhouette scores for each feature
+    feature_scores = {}
+
+    # Loop through each feature
+    for feature in X.columns:
+        # Create a new dataframe with just this feature
+        X_single = X[[feature]]
+
+        # Create an empty list to store the Silhouette scores for this feature
+        scores = []
+
+        # Loop through the range of k values
+        for k in range(k_min, k_max+1):
+            # Fit a KMeans clustering model
+            kmeans = KMeans(n_clusters=k, random_state=828).fit(X_single)
+
+            # Calculate the Silhouette score for the clustering
+            score = silhouette_score(X_single, kmeans.labels_)
+
+            # Add the score for this iteration of k to the list of scores for this feature
+            scores.append(score)
+
+        # Calculate the mean Silhouette score for this feature
+        mean_score = sum(scores) / len(scores)
+
+        # Add the mean Silhouette score for this feature to the dictionary
+        feature_scores[feature] = mean_score
+
+    # Sort the dictionary by value (descending) and get the top 6 features
+    top_features = sorted(feature_scores, key=feature_scores.get, reverse=True)[:6]
+
+    # Print the top 6 features with their mean Silhouette scores
+    print("Top 6 features:")
+    for feature in top_features:
+        print(f"{feature}: {feature_scores[feature]:.3f}")
+    
 
 
 def scale_data(train, validate, test, return_scaler=False):
@@ -192,17 +211,17 @@ def splitting_subsets(train, train_scaled, validate_scaled, test_scaled):
     '''
     
     
-    X_train = train_scaled.drop(columns = ['quality'])
+    X_train = train_scaled.drop(columns = ['quality', 'free sulfur dioxide'])
     X_train = pd.get_dummies(X_train, columns = ['color', 'scaled_clusters'])
     y_train = train_scaled['quality']
 
 
-    X_validate = validate_scaled.drop(columns = ['quality'])
+    X_validate = validate_scaled.drop(columns = ['quality', 'free sulfur dioxide'])
     X_validate = pd.get_dummies(X_validate, columns = ['color', 'scaled_clusters'])
     y_validate = validate_scaled['quality']
 
 
-    X_test = test_scaled.drop(columns = ['quality'])
+    X_test = test_scaled.drop(columns = ['quality', 'free sulfur dioxide'])
     X_test = pd.get_dummies(X_test, columns = ['color', 'scaled_clusters'])
     y_test = test_scaled['quality']
 
@@ -477,6 +496,145 @@ def test_model(X_train, y_train, X_test, y_test):
 
 
 
+    
+def get_vis_df(df):
+    '''
+    takes in df, makes a copy, then preps for cluster model visualization
+    '''
+    vis_df = df.sample(frac=1, random_state=101).reset_index(drop=True)
+    # Define a dictionary that maps the quality levels to numerical values
+    quality_map = {'low': 0, 'medium': 1, 'high': 2}
+    #
+    vis_df['quality_label'] = vis_df.quality.apply(lambda q: 'low' if q <= 5 else 'medium' if q <= 7 else 'high')
+    # Create a new column in the DataFrame that maps the quality values to numerical values
+    vis_df['quality_num'] = vis_df['quality_label'].map(quality_map)
+    # drop target variable
+    vis_df = vis_df.drop(columns=['quality_label', 'quality'])
+    
+    return vis_df
+    
+def get_3d_vis1(df):
+    '''
+    renders 3d cluster vis
+    '''
+    data = df
+    
+    trace1 = go.Scatter3d(
+        x= data['fixed acidity'],
+        y= data['quality_num'],
+        z= data['volatile acidity'],
+        mode='markers',
+         marker=dict(
+            color = data['volatile acidity'], 
+            size= 10,
+            line=dict(
+                color= data['volatile acidity'],
+                width= 12
+            ),
+            opacity=0.8
+         )
+    )
+    data1 = [trace1]
+    layout = go.Layout(
+        title= 'Clusters with Fixed Acidity and Volatile Acidity',
+        scene = dict(
+                xaxis = dict(title  = 'Fixed Acidity'),
+                yaxis = dict(title  = 'Quality'),
+                zaxis = dict(title  = 'Volatile Acidity')
+            )
+    )
+    fig = go.Figure(data=data1, layout=layout)
+    py.offline.iplot(fig)
+    
+    
+def get_3d_vis2(df):
+    '''
+    renders 3d cluster vis
+    '''
+    data = df
+    
+    trace1 = go.Scatter3d(
+        x= data['citric acid'],
+        y= data['quality_num'],
+        z= data['residual sugar'],
+        mode='markers',
+         marker=dict(
+            color = data['residual sugar'], 
+            size= 10,
+            line=dict(
+                color= data['residual sugar'],
+                width= 12
+            ),
+            opacity=0.8
+         )
+    )
+    data1 = [trace1]
+    layout = go.Layout(
+        title= 'Clusters with Citric Acid and Residual Sugar',
+        scene = dict(
+                xaxis = dict(title  = 'Citric Acid'),
+                yaxis = dict(title  = 'Quality'),
+                zaxis = dict(title  = 'Residual Sugar')
+            )
+    )
+    fig = go.Figure(data=data1, layout=layout)
+    py.offline.iplot(fig)
+
+    
+def get_3d_vis3(df):
+    '''
+    renders 3d cluster vis
+    '''
+    data = df
+    
+    trace1 = go.Scatter3d(
+        x= data['free sulfur dioxide'],
+        y= data['quality_num'],
+        z= data['chlorides'],
+        mode='markers',
+         marker=dict(
+            color = data['chlorides'], 
+            size= 10,
+            line=dict(
+                color= data['chlorides'],
+                width= 12
+            ),
+            opacity=0.8
+         )
+    )
+    data1 = [trace1]
+    layout = go.Layout(
+        title= 'Clusters with Free Sulfur Dioxide and Chlorides',
+        scene = dict(
+                xaxis = dict(title  = 'free sulfur dioxide'),
+                yaxis = dict(title  = 'Quality'),
+                zaxis = dict(title  = 'chlorides')
+            )
+    )
+    fig = go.Figure(data=data1, layout=layout)
+    py.offline.iplot(fig)
 
 
 
+def splitting_subsets2(train, train_scaled, validate_scaled, test_scaled):
+    '''
+    This function splits our train, validate, and test scaled datasets into X/y train,
+    validate, and test subsets
+    '''
+    X_train2 = train_scaled.drop(columns = ['quality', 'free sulfur dioxide', 'scaled_clusters'])
+    X_train2 = pd.get_dummies(X_train2, columns = ['color'])
+    y_train2 = train_scaled['quality']
+
+
+    X_validate2 = validate_scaled.drop(columns = ['quality', 'free sulfur dioxide', 'scaled_clusters'])
+    X_validate2 = pd.get_dummies(X_validate2, columns = ['color'])
+    y_validate2 = validate_scaled['quality']
+
+
+    X_test2 = test_scaled.drop(columns = ['quality', 'free sulfur dioxide', 'scaled_clusters'])
+    X_test2 = pd.get_dummies(X_test2, columns = ['color'])
+    y_test2 = test_scaled['quality']
+
+    return X_train2, y_train2, X_validate2, y_validate2, X_test2, y_test2    
+
+    

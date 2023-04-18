@@ -11,8 +11,54 @@ import seaborn as sns
 import scipy.stats as stats
 
 import sklearn.preprocessing
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from sklearn.cluster import KMeans
+
+
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
+
+
+
+
+def corr_map(df):
+    '''
+    Creates a correlation matrix heatmap of the top correlated columns in a given DataFrame.
+
+    Parameters:
+    df (pandas.DataFrame): The DataFrame containing the data.
+    '''
+    # Encode the 'quality' column using LabelEncoder
+    class_tp = LabelEncoder()
+
+    class_ql = {'low':0, 'medium': 1, 'high': 2}
+    y_ql = df.quality.map(class_ql)
+
+    # Compute the correlation matrix of the DataFrame
+    corr = df.corr()
+
+    # Identify the top correlated columns (excluding 'color')
+    top_corr_cols = corr.quality.sort_values(ascending=False).keys()
+
+    # Extract the submatrix of the top correlated columns
+    top_corr = corr.loc[top_corr_cols, top_corr_cols]
+
+    # Create a mask to hide the upper triangle of the heatmap
+    dropSelf = np.zeros_like(top_corr)
+    dropSelf[np.triu_indices_from(dropSelf)] = True
+
+    # Plot the correlation matrix heatmap
+    plt.figure(figsize=(18, 10))
+    sns.heatmap(top_corr, cmap=sns.diverging_palette(220, 10, as_cmap=True), annot=True, fmt=".2f", mask=dropSelf)
+    sns.set(font_scale=1.5)
+    plt.show()
+    
+    # Delete temporary variables
+    del corr, dropSelf, top_corr
 
 
 def target_dist(df):
@@ -251,5 +297,24 @@ def vol_stat(train):
     print(f"p-value: {p_value:.4f}")
 
 
+def col_stat(train):
+    '''
+    col_stat takes in train data and performs a two-sample t-test 
+    comparing high quality and lower quality wines based on each column.
+    '''
+    # create two samples
+    high_quality = train[train['quality']>= 7]
+    low_quality = train[train['quality'] <= 5]
     
+    # iterate over each column in the dataframe
+    for col in train.columns:
+        if col == 'quality' or col == 'color':
+            continue
+        else:
+            # perform two-sample t-test
+            t_statistic, p_value = stats.ttest_ind(low_quality[col], high_quality[col], equal_var=True)
+
+            # print results
+            print(f"{col} - t-statistic: {t_statistic:.2f}")
+            print(f"{col} - p-value: {p_value:.4f}")    
 
