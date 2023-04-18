@@ -26,21 +26,35 @@ def get_df():
     '''
     get_df pulls red and white wine df's from data.world url's,
     creates a new column for wine color, concats them and returns 
-    them as a single pandas df with only unique rows.
+    them as a single pandas df with only unique rows. Outliers are
+    also removed in accordance with the 3-sigma rule.
     '''
     # Pull in red and white wine df's
     df_white = pd.read_csv(
         'https://query.data.world/s/lmm2oc73ncl233bsk4m4pergggesuf?dws=00000')
     df_red = pd.read_csv(
         'https://query.data.world/s/xvy3biopsnfrfxfgialtawp6v477mk?dws=00000')
+    
     # add column for wine color before merging
     df_white['color']= 'white'
     df_red['color']= 'red'
+    
     #concat them and return new df
     df= pd.concat([df_white, df_red], ignore_index=True)
-    # remove duplicates and return only unique rows 
-    df = unique_rows(df)
     
+    # remove duplicates and outliers
+    df = unique_rows(df)
+    for col in df.columns:
+        if df[col].dtype in [np.int64, np.float64]:
+            # calculate mean and std deviation for each column
+            col_mean = df[col].mean()
+            col_std = df[col].std()
+            # create lower and upper bounds for the column
+            lower_bound = col_mean - 3*col_std
+            upper_bound = col_mean + 3*col_std
+            # remove rows with values outside the bounds
+            df = df[(df[col] >= lower_bound) & (df[col] <= upper_bound)]
+            
     return df
 
 ############ SPLIT ###############

@@ -59,11 +59,11 @@ def abv_plots(train):
     plt.xlabel(' % Alcohol by Volume')
     # draw low quality mean line
     plt.axvline(x=mean_low_qual, label='Lower Quality Mean ABV', color='orange')
-    plt.text(mean_low_qual + 1.8, 100, f'Lower Quality Mean ABV = {mean_low_qual:.1f}%', 
+    plt.text(mean_low_qual + 1.8, 70, f'Lower Quality Mean ABV = {mean_low_qual:.1f}%', 
              fontsize=10, color='red')
     # draw high quality mean line
     plt.axvline(x= mean_high_qual, label='High Quality Mean ABV', color='magenta')
-    plt.text(mean_high_qual + .2, 120, f'High Quality Mean ABV= {mean_high_qual:.1f}%', 
+    plt.text(mean_high_qual + .2, 80, f'High Quality Mean ABV= {mean_high_qual:.1f}%', 
              fontsize=10, color='red')
     # produce legen
     plt.legend()
@@ -219,11 +219,11 @@ def vol_acid_plots(train):
     plt.xlabel('Volatile Acidity Levels (g / dm^3)')
     # draw mean lines and text
     plt.axvline(x=mean_high_vol, color='cyan', label='High Quality Mean Volatile Acidity')
-    plt.text(mean_high_vol + .3, 125, f'High Quality Mean Volatile Acidity= {mean_high_vol:.2f}%', 
+    plt.text(mean_high_vol + .3, 85, f'High Quality Mean Volatile Acidity= {mean_high_vol:.2f}%', 
              fontsize=10, color='red')
     # draw mean lines and text
     plt.axvline(x=mean_low_vol, color='magenta', label='Lower Quality Mean Volatile Acidity')
-    plt.text(mean_low_vol + .18, 110, f'Lower Quality Mean Volatile Acidity = {mean_low_vol:.2f}%', 
+    plt.text(mean_low_vol + .18, 70, f'Lower Quality Mean Volatile Acidity = {mean_low_vol:.2f}%', 
              fontsize=10, color='red')
     # add legend
     plt.legend()
