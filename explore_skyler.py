@@ -316,5 +316,50 @@ def col_stat(train):
 
             # print results
             print(f"{col} - t-statistic: {t_statistic:.2f}")
-            print(f"{col} - p-value: {p_value:.4f}")    
+            print(f"{col} - p-value: {p_value:.4f}") 
+            
 
+    
+    
+def clust_vis(df):
+    '''
+    clust_vis takes in wine df, makes a copy, then plots a cluster visualization
+    '''
+    vis_df = df.copy()
+    vis_df['quality_label'] = vis_df.quality.apply(lambda q: 'low' if q <= 5 else 'medium' if q <= 7 else 'high')
+    #wines.quality_label = pd.Categorical(wines.quality_label, categories=['low', 'medium', 'high'], ordered=True)
+
+    # re-shuffle records just to randomize data points
+    vis_df = vis_df.sample(frac=1, random_state=101).reset_index(drop=True)
+    # Define a dictionary that maps the quality levels to numerical values
+    quality_map = {'low': 0, 'medium': 1, 'high': 2}
+
+    # Create a new column in the DataFrame that maps the quality values to numerical values
+    vis_df['quality_num'] = vis_df['quality_label'].map(quality_map)
+    
+    g = sns.FacetGrid(vis_df, col='color', hue='quality_label', col_order=['red', 'white'], hue_order=['low', 'medium', 'high'],
+                  aspect=1.2, size=2.5, palette=sns.light_palette('navy', 3))
+    g.map(plt.scatter, 'density', 'residual sugar', alpha=0.9, edgecolor='white', linewidth=0.5)
+    fig = g.fig
+    fig.subplots_adjust(top=0.8, wspace=0.3)
+    fig.suptitle('Wine Type - Density - Residual Sugar', fontsize=14)
+    l = g.add_legend(title='Wine Quality Class')
+
+    g = sns.FacetGrid(vis_df, col='color', hue='quality_label', col_order=['red', 'white'], hue_order=['low', 'medium', 'high'],
+                      aspect=1.2, size=2.5, palette=sns.light_palette('green', 3))
+    g.map(plt.scatter, "density", "volatile acidity", alpha=0.9, edgecolor='white', linewidth=0.5)
+    fig = g.fig 
+    fig.subplots_adjust(top=0.8, wspace=0.3)
+    fig.suptitle('Wine Type - Density - Volitile Acidity', fontsize=14)
+    l = g.add_legend(title='Wine Quality Class')
+
+    g = sns.FacetGrid(vis_df, col='color', hue='quality_label', col_order=['red', 'white'], hue_order=['low', 'medium', 'high'],
+                      aspect=1.2, size=2.5, palette=sns.light_palette('lightcoral', 3))
+    g.map(plt.scatter, "total sulfur dioxide", "residual sugar", alpha=0.9, edgecolor='white', linewidth=0.5)
+    fig = g.fig 
+    fig.subplots_adjust(top=0.8, wspace=0.3)
+    fig.suptitle('Wine Type - Residual Sugar - Total Sulfur Dioxide', fontsize=14)
+    l = g.add_legend(title='Wine Quality Class')
+    
+    plt.show()
+    

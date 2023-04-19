@@ -520,41 +520,7 @@ def get_3d_vis1(df):
     data = df
     
     trace1 = go.Scatter3d(
-        x= data['fixed acidity'],
-        y= data['quality_num'],
-        z= data['volatile acidity'],
-        mode='markers',
-         marker=dict(
-            color = data['volatile acidity'], 
-            size= 10,
-            line=dict(
-                color= data['volatile acidity'],
-                width= 12
-            ),
-            opacity=0.8
-         )
-    )
-    data1 = [trace1]
-    layout = go.Layout(
-        title= 'Clusters with Fixed Acidity and Volatile Acidity',
-        scene = dict(
-                xaxis = dict(title  = 'Fixed Acidity'),
-                yaxis = dict(title  = 'Quality'),
-                zaxis = dict(title  = 'Volatile Acidity')
-            )
-    )
-    fig = go.Figure(data=data1, layout=layout)
-    py.offline.iplot(fig)
-    
-    
-def get_3d_vis2(df):
-    '''
-    renders 3d cluster vis
-    '''
-    data = df
-    
-    trace1 = go.Scatter3d(
-        x= data['citric acid'],
+        x= data['density'],
         y= data['quality_num'],
         z= data['residual sugar'],
         mode='markers',
@@ -570,11 +536,45 @@ def get_3d_vis2(df):
     )
     data1 = [trace1]
     layout = go.Layout(
-        title= 'Clusters with Citric Acid and Residual Sugar',
+        title= 'Clusters with Density and Residual Sugar',
         scene = dict(
-                xaxis = dict(title  = 'Citric Acid'),
+                xaxis = dict(title  = 'Density'),
                 yaxis = dict(title  = 'Quality'),
                 zaxis = dict(title  = 'Residual Sugar')
+            )
+    )
+    fig = go.Figure(data=data1, layout=layout)
+    py.offline.iplot(fig)
+    
+    
+def get_3d_vis2(df):
+    '''
+    renders 3d cluster vis
+    '''
+    data = df
+    
+    trace1 = go.Scatter3d(
+        x= data['density'],
+        y= data['quality_num'],
+        z= data['volatile acidity'],
+        mode='markers',
+         marker=dict(
+            color = data['volatile acidity'], 
+            size= 10,
+            line=dict(
+                color= data['volatile acidity'],
+                width= 12
+            ),
+            opacity=0.8
+         )
+    )
+    data1 = [trace1]
+    layout = go.Layout(
+        title= 'Clusters with Density and Volatile Acidity',
+        scene = dict(
+                xaxis = dict(title  = 'Density'),
+                yaxis = dict(title  = 'Quality'),
+                zaxis = dict(title  = 'Volatile Acidity')
             )
     )
     fig = go.Figure(data=data1, layout=layout)
@@ -588,15 +588,15 @@ def get_3d_vis3(df):
     data = df
     
     trace1 = go.Scatter3d(
-        x= data['free sulfur dioxide'],
+        x= data['total sulfur dioxide'],
         y= data['quality_num'],
-        z= data['chlorides'],
+        z= data['residual sugar'],
         mode='markers',
          marker=dict(
-            color = data['chlorides'], 
+            color = data['residual sugar'], 
             size= 10,
             line=dict(
-                color= data['chlorides'],
+                color= data['residual sugar'],
                 width= 12
             ),
             opacity=0.8
@@ -604,11 +604,11 @@ def get_3d_vis3(df):
     )
     data1 = [trace1]
     layout = go.Layout(
-        title= 'Clusters with Free Sulfur Dioxide and Chlorides',
+        title= 'Clusters with Total Sulfur Dioxide and Residual Sugar',
         scene = dict(
-                xaxis = dict(title  = 'free sulfur dioxide'),
+                xaxis = dict(title  = 'Total Sulfur Dioxide'),
                 yaxis = dict(title  = 'Quality'),
-                zaxis = dict(title  = 'chlorides')
+                zaxis = dict(title  = 'Residual Sugar')
             )
     )
     fig = go.Figure(data=data1, layout=layout)
