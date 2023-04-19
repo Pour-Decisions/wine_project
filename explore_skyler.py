@@ -11,8 +11,54 @@ import seaborn as sns
 import scipy.stats as stats
 
 import sklearn.preprocessing
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from sklearn.cluster import KMeans
+
+
+
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
+
+
+
+
+def corr_map(df):
+    '''
+    Creates a correlation matrix heatmap of the top correlated columns in a given DataFrame.
+
+    Parameters:
+    df (pandas.DataFrame): The DataFrame containing the data.
+    '''
+    # Encode the 'quality' column using LabelEncoder
+    class_tp = LabelEncoder()
+
+    class_ql = {'low':0, 'medium': 1, 'high': 2}
+    y_ql = df.quality.map(class_ql)
+
+    # Compute the correlation matrix of the DataFrame
+    corr = df.corr()
+
+    # Identify the top correlated columns (excluding 'color')
+    top_corr_cols = corr.quality.sort_values(ascending=False).keys()
+
+    # Extract the submatrix of the top correlated columns
+    top_corr = corr.loc[top_corr_cols, top_corr_cols]
+
+    # Create a mask to hide the upper triangle of the heatmap
+    dropSelf = np.zeros_like(top_corr)
+    dropSelf[np.triu_indices_from(dropSelf)] = True
+
+    # Plot the correlation matrix heatmap
+    plt.figure(figsize=(18, 10))
+    sns.heatmap(top_corr, cmap=sns.diverging_palette(220, 10, as_cmap=True), annot=True, fmt=".2f", mask=dropSelf)
+    sns.set(font_scale=1.5)
+    plt.show()
+    
+    # Delete temporary variables
+    del corr, dropSelf, top_corr
 
 
 def target_dist(df):
@@ -59,11 +105,11 @@ def abv_plots(train):
     plt.xlabel(' % Alcohol by Volume')
     # draw low quality mean line
     plt.axvline(x=mean_low_qual, label='Lower Quality Mean ABV', color='orange')
-    plt.text(mean_low_qual + 1.8, 100, f'Lower Quality Mean ABV = {mean_low_qual:.1f}%', 
+    plt.text(mean_low_qual + 1.8, 70, f'Lower Quality Mean ABV = {mean_low_qual:.1f}%', 
              fontsize=10, color='red')
     # draw high quality mean line
     plt.axvline(x= mean_high_qual, label='High Quality Mean ABV', color='magenta')
-    plt.text(mean_high_qual + .2, 120, f'High Quality Mean ABV= {mean_high_qual:.1f}%', 
+    plt.text(mean_high_qual + .2, 80, f'High Quality Mean ABV= {mean_high_qual:.1f}%', 
              fontsize=10, color='red')
     # produce legen
     plt.legend()
@@ -219,11 +265,11 @@ def vol_acid_plots(train):
     plt.xlabel('Volatile Acidity Levels (g / dm^3)')
     # draw mean lines and text
     plt.axvline(x=mean_high_vol, color='cyan', label='High Quality Mean Volatile Acidity')
-    plt.text(mean_high_vol + .3, 125, f'High Quality Mean Volatile Acidity= {mean_high_vol:.2f}%', 
+    plt.text(mean_high_vol + .3, 85, f'High Quality Mean Volatile Acidity= {mean_high_vol:.2f}%', 
              fontsize=10, color='red')
     # draw mean lines and text
     plt.axvline(x=mean_low_vol, color='magenta', label='Lower Quality Mean Volatile Acidity')
-    plt.text(mean_low_vol + .18, 110, f'Lower Quality Mean Volatile Acidity = {mean_low_vol:.2f}%', 
+    plt.text(mean_low_vol + .18, 70, f'Lower Quality Mean Volatile Acidity = {mean_low_vol:.2f}%', 
              fontsize=10, color='red')
     # add legend
     plt.legend()
@@ -251,5 +297,24 @@ def vol_stat(train):
     print(f"p-value: {p_value:.4f}")
 
 
+def col_stat(train):
+    '''
+    col_stat takes in train data and performs a two-sample t-test 
+    comparing high quality and lower quality wines based on each column.
+    '''
+    # create two samples
+    high_quality = train[train['quality']>= 7]
+    low_quality = train[train['quality'] <= 5]
     
+    # iterate over each column in the dataframe
+    for col in train.columns:
+        if col == 'quality' or col == 'color':
+            continue
+        else:
+            # perform two-sample t-test
+            t_statistic, p_value = stats.ttest_ind(low_quality[col], high_quality[col], equal_var=True)
+
+            # print results
+            print(f"{col} - t-statistic: {t_statistic:.2f}")
+            print(f"{col} - p-value: {p_value:.4f}")    
 
