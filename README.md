@@ -46,7 +46,7 @@
 
 * PolynomialFeatures was the best performing model, reducing RMSE from the baseline of 0.85, to 0.68 on the validate set. 
 
-* This resulted in a 20% reduction in root mean squared error on our validate set.
+* This resulted in a 20% reduction in root mean squared error.
 
 # Recommendations
 
