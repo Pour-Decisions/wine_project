@@ -3,6 +3,8 @@
 
 # Project Description:
 
+* Our mock consulting firm is tasked with a project to predict quality rating (1-10) of different wines. We are provided a datset of red wines, a datset with white wines, with features we will explore to find drivers of quality through statistical tests and data visualizations. We will also use clustering models to engineer additional features. We will then use these features to build a machine learning model that will predict if a wine will be of low or high quality. 
+
 * Following the Data Science pipeline, build a machine learning model that accurately predicts wine quality rating.
 
 # Goals:
